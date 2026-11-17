@@ -1,18 +1,22 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+import { Palette } from '../constants/palette';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
+//Stack acts like a stack! it stacks the screens on top of each other so u can navigate back and forth with it
+export default function RootLayout() {
   const colorScheme = useColorScheme();
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AnimatedSplashOverlay />
-      <AppTabs />
+      <Stack screenOptions={{ headerTintColor: Palette.scarlet }}>
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+        <Stack.Screen name="search" options={{ title: 'Find Courses' }} />
+      </Stack>
     </ThemeProvider>
   );
 }

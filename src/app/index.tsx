@@ -1,98 +1,74 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Palette } from '../constants/palette';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+const SEMESTER = 'Spring 2027';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
-  return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+const features = [
+  { title: 'My Schedule', subtitle: 'View your classes' },
+  { title: 'Find Courses', subtitle: 'Browse Rutgers classes' },
+  { title: 'Degree Progress', subtitle: 'Track requirements' },
+  { title: 'Build Schedule', subtitle: 'Generate combinations' },
+];
 
 export default function HomeScreen() {
+  const router = useRouter();
   return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+    <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
+      <View style={styles.header}>
+        <Text style={styles.brand}>RU Planner</Text>
+        <Text style={styles.eyebrow}>YOUR ACADEMIC DASHBOARD</Text>
+        <Text style={styles.title}>Plan your semester.</Text>
+        <Text style={styles.tagline}>Your courses, your schedule, your degree.</Text>
+      </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <View style={styles.semesterPill}>
+        <Text style={styles.semesterText}>{SEMESTER}</Text>
+      </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      {features.map((f) => (
+        <Pressable
+          key={f.title}
+          style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
+          onPress={() => {
+              if (f.title === 'Find Courses') router.push('/search');
+              else console.log('Pressed', f.title);
+          }}
+        >
+          <Text style={styles.cardTitle}>{f.title}</Text>
+          <Text style={styles.cardSubtitle}>{f.subtitle}</Text>
+        </Pressable>
+      ))}
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+  screen: { flex: 1, backgroundColor: Palette.light },
+  content: { padding: 20, paddingTop: 70 },
+  header: { marginBottom: 20 },
+  brand: { fontSize: 22, fontWeight: '800', color: Palette.scarlet },
+  eyebrow: { fontSize: 12, letterSpacing: 1.5, color: Palette.gray, marginTop: 16 },
+  title: { fontSize: 32, fontWeight: '800', color: Palette.dark, marginTop: 6 },
+  tagline: { fontSize: 16, color: Palette.gray, marginTop: 6 },
+  semesterPill: {
+    alignSelf: 'flex-start',
+    backgroundColor: Palette.scarlet,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 20,
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  semesterText: { color: Palette.white, fontWeight: '700' },
+  card: {
+    backgroundColor: Palette.white,
+    borderRadius: 14,
+    padding: 18,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: Palette.border,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
-  },
+  cardPressed: { opacity: 0.7 },
+  cardTitle: { fontSize: 18, fontWeight: '700', color: Palette.dark },
+  cardSubtitle: { fontSize: 14, color: Palette.gray, marginTop: 4 },
 });
