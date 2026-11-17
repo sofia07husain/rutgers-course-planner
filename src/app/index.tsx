@@ -31,9 +31,10 @@ export default function HomeScreen() {
           key={f.title}
           style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
           onPress={() => {
-              if (f.title === 'Find Courses') router.push('/search');
-              else console.log('Pressed', f.title);
-          }}
+            if (f.title === 'Find Courses') router.push('/search');
+            else if (f.title === 'My Schedule') router.push('/schedule');
+            else console.log('Pressed', f.title);
+}}
         >
           <Text style={styles.cardTitle}>{f.title}</Text>
           <Text style={styles.cardSubtitle}>{f.subtitle}</Text>
@@ -45,7 +46,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: Palette.light },
-  content: { padding: 20, paddingTop: 70 },
+  content: { padding: 20},
   header: { marginBottom: 20 },
   brand: { fontSize: 22, fontWeight: '800', color: Palette.scarlet },
   eyebrow: { fontSize: 12, letterSpacing: 1.5, color: Palette.gray, marginTop: 16 },
