@@ -3,13 +3,15 @@ import { COURSES } from '@/data/courses';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSchedule } from '../context/schedule';
+import { findConflicts } from './utils/conflictChecker';
+
 
 //useState gives you a variable query and the change function setQuery 
 //React will re draw the screen with the new value --
 //according to what user types itll update the query accordingly
 export default function SearchScreen() {
   const [query, setQuery] = useState('');
-  const { addCourse, removeCourse, hasCourse } = useSchedule();
+  const { myCourses, addCourse, removeCourse, hasCourse } = useSchedule();
 
   // only keeps the courses that match what the user typed
   const results = COURSES.filter((c) => {
@@ -33,6 +35,7 @@ export default function SearchScreen() {
         ListEmptyComponent={<Text style={styles.empty}>No courses found.</Text>}
         renderItem={({ item }) => {
           const added = hasCourse(item.code);
+          const conflicts = added ? [] : findConflicts(item, myCourses);
           return (
             <View style={styles.card}>
               <Text style={styles.code}>{item.code}</Text>
@@ -40,6 +43,11 @@ export default function SearchScreen() {
               <Text style={styles.meta}>
                 {item.credits} credits · {item.days} · {item.time}
               </Text>
+              {conflicts.length > 0 && (
+                <Text style={styles.warning}>
+                  ⚠ Conflicts with {conflicts.map((c) => c.code).join(', ')}
+                  </Text>
+                )}
               <Pressable
                 style={[styles.button, added && styles.buttonAdded]}
                 onPress={() => (added ? removeCourse(item.code) : addCourse(item))}
@@ -57,6 +65,7 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
+  warning: { fontSize: 13, fontWeight: '600', color: Palette.scarlet, marginTop: 8 },
   screen: { flex: 1, backgroundColor: Palette.light, padding: 20 },
   input: {
     backgroundColor: Palette.white,

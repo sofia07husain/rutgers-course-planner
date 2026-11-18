@@ -15,4 +15,5 @@ export const COURSES: Course[] = [
   { code: 'MATH 151', title: 'Calculus I', credits: 4, department: 'MATH', days: 'MW', time: '8:40 AM - 10:00 AM' },
   { code: 'MATH 152', title: 'Calculus II', credits: 4, department: 'MATH', days: 'TH', time: '3:50 PM - 5:10 PM' },
   { code: 'MATH 250', title: 'Linear Algebra', credits: 3, department: 'MATH', days: 'MW', time: '3:50 PM - 5:10 PM' },
+  { code: 'CS 206', title: 'Introduction to Data Science', credits: 4, department: 'CS', days: 'MW', time: '10:20 AM - 11:40 AM' },
 ];
