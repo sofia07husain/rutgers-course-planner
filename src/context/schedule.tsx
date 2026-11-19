@@ -1,38 +1,31 @@
 import { createContext, ReactNode, useContext, useState } from 'react';
-import { Course } from '../data/courses';
+import { Section } from '../data/courses';
 
 type ScheduleContextType = {
-    myCourses : Course[];
-    addCourse: (course : Course) => void; 
-    removeCourse: (code: string) => void; 
-    hasCourse: (code: string) => boolean; 
+  mySections: Section[];
+  addSection: (section: Section) => void;
+  removeSection: (id: string) => void;
+  hasSection: (id: string) => boolean;
 };
 
-const ScheduleContext = createContext<ScheduleContextType| null>(null);
+const ScheduleContext = createContext<ScheduleContextType | null>(null);
 
-export function ScheduleProvider({children} : {children: ReactNode}){
-    const[myCourses , setMyCourses] = useState<Course[]>([]);
+export function ScheduleProvider({ children }: { children: ReactNode }) {
+  const [mySections, setMySections] = useState<Section[]>([]);
 
-    const addCourse = (course : Course) => {
-        setMyCourses((prev) => [...prev, course]);
-        //adds course to end
-    };
+  const addSection = (section: Section) => setMySections((prev) => [...prev, section]);
+  const removeSection = (id: string) => setMySections((prev) => prev.filter((s) => s.id !== id));
+  const hasSection = (id: string) => mySections.some((s) => s.id === id);
 
-    const removeCourse = (code : string) => {
-        setMyCourses((prev) => prev.filter((c) => c.code != code));
-    };
-
-    const hasCourse = (code : string) => myCourses.some((c) => c.code == code);
-
-    return(
-        <ScheduleContext.Provider value = {{myCourses, addCourse, removeCourse, hasCourse}}>
-            {children}
-        </ScheduleContext.Provider>
-    );
+  return (
+    <ScheduleContext.Provider value={{ mySections, addSection, removeSection, hasSection }}>
+      {children}
+    </ScheduleContext.Provider>
+  );
 }
 
-export function useSchedule(){
-    const ctx = useContext(ScheduleContext); 
-    if(!ctx) throw new Error('useSchedule must be inside ScheduleProvider'); 
-    return ctx; 
+export function useSchedule() {
+  const ctx = useContext(ScheduleContext);
+  if (!ctx) throw new Error('useSchedule must be used inside ScheduleProvider');
+  return ctx;
 }

@@ -1,56 +1,61 @@
-import { Palette } from '@/constants/palette';
-import { COURSES } from '@/data/courses';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Palette } from '../constants/palette';
 import { useSchedule } from '../context/schedule';
-import { findConflicts } from './utils/conflictChecker';
+import { SECTIONS } from '../data/courses';
+import { findConflicts } from '../utils/conflictChecker';
+import { formatMeetings } from '../utils/format';
 
-
-//useState gives you a variable query and the change function setQuery 
-//React will re draw the screen with the new value --
-//according to what user types itll update the query accordingly
 export default function SearchScreen() {
   const [query, setQuery] = useState('');
-  const { myCourses, addCourse, removeCourse, hasCourse } = useSchedule();
+  const { mySections, addSection, removeSection, hasSection } = useSchedule();
 
-  // only keeps the courses that match what the user typed
-  const results = COURSES.filter((c) => {
+  const results = SECTIONS.filter((s) => {
     const q = query.toLowerCase();
-    return c.code.toLowerCase().includes(q) || c.title.toLowerCase().includes(q);
+    return (
+      s.code.toLowerCase().includes(q) ||
+      s.title.toLowerCase().includes(q) ||
+      s.instructors.some((i) => i.toLowerCase().includes(q))
+    );
   });
 
-    return (
+  return (
     <View style={styles.screen}>
       <TextInput
         style={styles.input}
-        placeholder="Search by course name or code"
+        placeholder="Search by course, code, or instructor"
         placeholderTextColor={Palette.gray}
         value={query}
         onChangeText={setQuery}
       />
-       <FlatList
-       //more efficient way to render long lists
+      <Text style={styles.count}>{results.length} sections</Text>
+
+      <FlatList
         data={results}
-        keyExtractor={(c) => c.code}
-        ListEmptyComponent={<Text style={styles.empty}>No courses found.</Text>}
+        keyExtractor={(s) => s.id}
+        ListEmptyComponent={<Text style={styles.empty}>No sections found.</Text>}
         renderItem={({ item }) => {
-          const added = hasCourse(item.code);
-          const conflicts = added ? [] : findConflicts(item, myCourses);
+          const added = hasSection(item.id);
+          const conflicts = added ? [] : findConflicts(item, mySections);
           return (
             <View style={styles.card}>
-              <Text style={styles.code}>{item.code}</Text>
+              <Text style={styles.code}>
+                {item.code} · Section {item.section}
+              </Text>
               <Text style={styles.title}>{item.title}</Text>
               <Text style={styles.meta}>
-                {item.credits} credits · {item.days} · {item.time}
+                {item.credits} credits · {item.open ? 'Open' : 'Closed'}
               </Text>
+              <Text style={styles.meta}>{formatMeetings(item)}</Text>
+              <Text style={styles.meta}>{item.instructors.join('; ') || 'Staff'}</Text>
               {conflicts.length > 0 && (
                 <Text style={styles.warning}>
                   ⚠ Conflicts with {conflicts.map((c) => c.code).join(', ')}
-                  </Text>
-                )}
+                </Text>
+              )}
               <Pressable
                 style={[styles.button, added && styles.buttonAdded]}
-                onPress={() => (added ? removeCourse(item.code) : addCourse(item))}
+                onPress={() => (added ? removeSection(item.id) : addSection(item))}
               >
                 <Text style={[styles.buttonText, added && styles.buttonTextAdded]}>
                   {added ? 'Added ✓' : 'Add'}
@@ -65,7 +70,6 @@ export default function SearchScreen() {
 }
 
 const styles = StyleSheet.create({
-  warning: { fontSize: 13, fontWeight: '600', color: Palette.scarlet, marginTop: 8 },
   screen: { flex: 1, backgroundColor: Palette.light, padding: 20 },
   input: {
     backgroundColor: Palette.white,
@@ -74,8 +78,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 14,
     fontSize: 16,
-    marginBottom: 16,
+    marginBottom: 8,
   },
+  count: { fontSize: 13, color: Palette.gray, marginBottom: 12 },
   card: {
     backgroundColor: Palette.white,
     borderRadius: 14,
@@ -87,6 +92,7 @@ const styles = StyleSheet.create({
   code: { fontSize: 14, fontWeight: '800', color: Palette.scarlet },
   title: { fontSize: 17, fontWeight: '700', color: Palette.dark, marginTop: 2 },
   meta: { fontSize: 13, color: Palette.gray, marginTop: 4 },
+  warning: { fontSize: 13, fontWeight: '600', color: Palette.scarlet, marginTop: 8 },
   empty: { textAlign: 'center', color: Palette.gray, marginTop: 40 },
   button: {
     alignSelf: 'flex-start',

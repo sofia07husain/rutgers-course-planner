@@ -2,17 +2,18 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Palette } from '../constants/palette';
 import { useSchedule } from '../context/schedule';
 import { findConflicts } from '../utils/conflictChecker';
+import { formatMeetings } from '../utils/format';
 
 export default function ScheduleScreen() {
-  const { myCourses, removeCourse } = useSchedule();
+  const { mySections, removeSection } = useSchedule();
 
-  const totalCredits = myCourses.reduce((sum, c) => sum + c.credits, 0);
-  const conflictCount = myCourses.filter((c) => findConflicts(c, myCourses).length > 0).length;
+  const totalCredits = mySections.reduce((sum, s) => sum + s.credits, 0);
+  const conflictCount = mySections.filter((s) => findConflicts(s, mySections).length > 0).length;
 
   return (
     <View style={styles.screen}>
       <Text style={styles.summary}>
-        {myCourses.length} courses · {totalCredits} credits
+        {mySections.length} courses · {totalCredits} credits
       </Text>
 
       {conflictCount > 0 && (
@@ -24,26 +25,28 @@ export default function ScheduleScreen() {
       )}
 
       <FlatList
-        data={myCourses}
-        keyExtractor={(c) => c.code}
+        data={mySections}
+        keyExtractor={(s) => s.id}
         ListEmptyComponent={
-          <Text style={styles.empty}>No courses yet. Add some from Find Courses.</Text>
+          <Text style={styles.empty}>No courses yet. Add some from Courses.</Text>
         }
         renderItem={({ item }) => {
-          const conflicts = findConflicts(item, myCourses);
+          const conflicts = findConflicts(item, mySections);
           return (
             <View style={[styles.card, conflicts.length > 0 && styles.cardConflict]}>
-              <Text style={styles.code}>{item.code}</Text>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.meta}>
-                {item.credits} credits · {item.days} · {item.time}
+              <Text style={styles.code}>
+                {item.code} · Section {item.section}
               </Text>
+              <Text style={styles.title}>{item.title}</Text>
+              <Text style={styles.meta}>{item.credits} credits</Text>
+              <Text style={styles.meta}>{formatMeetings(item)}</Text>
+              <Text style={styles.meta}>{item.instructors.join('; ') || 'Staff'}</Text>
               {conflicts.length > 0 && (
                 <Text style={styles.warning}>
                   ⚠ Conflicts with {conflicts.map((c) => c.code).join(', ')}
                 </Text>
               )}
-              <Pressable style={styles.removeButton} onPress={() => removeCourse(item.code)}>
+              <Pressable style={styles.removeButton} onPress={() => removeSection(item.id)}>
                 <Text style={styles.removeText}>Remove</Text>
               </Pressable>
             </View>
